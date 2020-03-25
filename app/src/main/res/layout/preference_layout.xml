@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <EditTextPreference android:title="Username"
+        android:key="username"
+        android:summary="Your preferred username"></EditTextPreference>
+    <EditTextPreference android:title="Email"
+        android:key="email"
+        android:summary="Your preferred email"></EditTextPreference>
+    <CheckBoxPreference android:title="Push notifications"
+        android:defaultValue="false"
+        android:summary="We will notify you of the status of your orders."
+        android:key="pushNotifications" />
+    <CheckBoxPreference android:title="Email notifications"
+        android:defaultValue="false"
+        android:summary="We will email you of the status of your orders."
+        android:key="emailNotifications" />
+</PreferenceScreen>

@@ -2,28 +2,32 @@ package tppa.onlineshop;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
 
-import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.Checkable;
-import android.widget.EditText;
 import android.widget.ListView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.OpenOption;
 import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LifecycleObserver {
 
@@ -49,12 +53,77 @@ public class MainActivity extends AppCompatActivity implements LifecycleObserver
                 startActivity(intent);
             }
         });
+
+        loadAndUpdate();
     }
+
+    // Lab 5 - load sorting order from file internal storage
+    // starts
+    private void loadAndUpdate() {
+        String filename = "sortOrder.txt";
+        String contents = "";
+        try {
+            FileInputStream fis = getApplication().getApplicationContext().openFileInput(filename);
+            InputStreamReader inputStreamReader =
+                    new InputStreamReader(fis, StandardCharsets.UTF_8);
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line = reader.readLine();
+            while (line != null) {
+                stringBuilder.append(line).append('\n');
+                line = reader.readLine();
+            }
+            contents = stringBuilder.toString();
+            fis.close();
+        } catch (FileNotFoundException e) {
+            Log.e("file ops", e.getMessage());
+        }
+        catch (IOException e) {
+            Log.e("file op", e.getMessage());
+        } finally {
+            if (contents.split("\n")[0].equals("NAME")) {
+                sortBasedOnFilter("NAME");
+            }
+            if (contents.split("\n")[0].equals("PRICE")) {
+                sortBasedOnFilter("PRICE");
+            }
+        }
+        Log.println(Log.VERBOSE, "info", "Loaded file");
+    }
+    //ends
+
+    // Lab5 - save infos to file internal storage
+    // starts
+    private void saveSortOrder(String order) {
+        String filename = "sortOrder.txt";
+        FileOutputStream fos = null;
+        try {
+            fos = getApplication().getApplicationContext().openFileOutput(filename, 0);
+            fos.write(order.getBytes(), 0, order.length());
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.println(Log.VERBOSE, "info", "Saved file");
+    }
+    // ends
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("lifecycle", "onStart invoked");
+
+        // Lab 5 - uses shared preferences to retrieve infos
+        // starts
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String username = sharedPrefs.getString("username", "");
+
+        if (!username.equals("")) {
+            this.setTitle("Hello, " + username + "!");
+        }
+        // ends
+
     }
 
     @Override
@@ -153,6 +222,13 @@ public class MainActivity extends AppCompatActivity implements LifecycleObserver
                 Intent intent = new Intent(this, AboutAppActivity.class);
                 this.startActivity(intent);
                 break;
+            // Lab 5 - Add preference activity
+            // start
+            case R.id.Prefs:
+                Intent intent_pref = new Intent(this, MyPreferenceActivity.class);
+                this.startActivity(intent_pref);
+                break;
+            // end
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -175,9 +251,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleObserver
                 CheckBox priceCheckbox = customLayout.findViewById(R.id.price);
                 if (nameCheckbox.isChecked()) {
                     sortBasedOnFilter("NAME");
+                    saveSortOrder("NAME");
                 }
                 else if (priceCheckbox.isChecked()) {
                     sortBasedOnFilter("PRICE");
+                    saveSortOrder("PRICE");
                 }
             }
         });
@@ -209,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleObserver
         listView.setAdapter(adapter);
     }
 
-    String filter = "NAME";
+    public String filter = "NAME";
 
 
     public class ItemObject implements Comparable<ItemObject> {

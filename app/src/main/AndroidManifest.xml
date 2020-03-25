@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".AboutAppActivity"></activity>
+        <activity android:name=".MyPreferenceActivity"></activity>
         <activity android:name=".item_details" />
         <activity android:name=".MainActivity">
             <intent-filter>
