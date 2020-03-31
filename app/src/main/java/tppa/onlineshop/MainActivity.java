@@ -229,6 +229,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleObserver
                 this.startActivity(intent_pref);
                 break;
             // end
+            // Lab 6 - new Activity
+            case R.id.Sensors:
+                Intent intent_sensors = new Intent(this, SensorsActivity.class);
+                this.startActivity(intent_sensors);
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
