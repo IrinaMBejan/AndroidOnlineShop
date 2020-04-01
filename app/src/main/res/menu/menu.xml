@@ -3,5 +3,6 @@
     <item android:id="@+id/Sort" android:title="Sort"/>
     <item android:id="@+id/About" android:title="About"/>
     <item android:id="@+id/Sensors" android:title="Sensors"/>
+    <item android:id="@+id/Camera" android:title="Camera"/>
     <item android:id="@+id/Prefs" android:title="Preferences"/>
 </menu>
