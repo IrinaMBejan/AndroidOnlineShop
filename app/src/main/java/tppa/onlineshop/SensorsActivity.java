@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -30,7 +31,7 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
 
     private SensorManager sensorsManager;
     private LocationManager locationManager;
-
+    private List<Sensor> sensorList;
     String[] sensorsName;
     String[] sensorsValue;
     String[] permissions = {
@@ -46,15 +47,16 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         sensorsManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         locationManager =  (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        List<Sensor> sensorList = sensorsManager.getSensorList(Sensor.TYPE_ALL);
+        sensorList = sensorsManager.getSensorList(Sensor.TYPE_ALL);
         sensorsName = new String[sensorList.size()];
         sensorsValue = new String[sensorList.size()];
 
         for (int i = 0; i < sensorList.size(); i++) {
             Sensor s = sensorList.get(i);
             sensorsName[i] = s.getName();
-            sensorsValue[i] = "Power: " + String.valueOf(s.getPower()) + ", Max delay: " +
-            String.valueOf(s.getMaxDelay()) + ", Max range: " + String.valueOf(s.getMaximumRange());
+            sensorsValue[i] = "Value: ";
+//            sensorsValue[i] = "Value: -, Power: " + String.valueOf(s.getPower()) + ", Max delay: " +
+//            String.valueOf(s.getMaxDelay()) + ", Max range: " + String.valueOf(s.getMaximumRange());
         }
 
         SensorItemAdapter adapter = new SensorItemAdapter(this, sensorsName, sensorsValue);
@@ -84,6 +86,14 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        String name = event.sensor.getName();
+
+        for (int i = 0; i < sensorList.size(); i++) {
+            if (sensorsName[i].equals(name)) {
+                sensorsValue[i] = "Value: " + Arrays.toString(event.values);
+            }
+        }
+
     }
 
     @Override
@@ -112,6 +122,21 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        for (Sensor sensor : sensorList) {
+            sensorsManager.registerListener(this, sensor, 100000, 10000);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        sensorsManager.unregisterListener(this);
     }
 }
 
